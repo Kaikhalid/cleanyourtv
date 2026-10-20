@@ -107,6 +107,42 @@ Things that bit us or contributors, so they don't bite you. Commands use `tools/
   script now picks the known stock launcher among the candidates by itself; otherwise choose one on
   the TV or pass `STOCK_LAUNCHER=<package>`.
 
+## The Input button, or a phone remote, stops working after the stock launcher is gone
+
+On Google TV the stock launcher is what answers the remote's Input button (`KEYCODE_TV`). Once it is
+disabled and this launcher is Home, nothing handles that key unless `InputKeyService` is on, and it is
+**off unless you ask for it**. Seen on a TCL BeyondTV2 (Android 11), where a phone remote app
+(the Android TV remote protocol) also seemed to drop inputs after the swap.
+
+- **You will not find a switch for it on the TV.** The service is registered by the launcher, but this
+  firmware lists no toggle for it in Settings (the accessibility screen was empty). The only way to turn
+  it on is `adb`.
+- **Install it with the flag**: `INPUT_KEY_SERVICE=1 launcher/build-and-install.sh` (re-run it with the
+  same `STOCK_LAUNCHER=...` you used before; it also sets Home and disables the stock launcher again).
+- **Or enable just the service, without reinstalling anything**, when ADB is already on:
+
+  ```sh
+  tools/tv.py 'settings get secure enabled_accessibility_services'   # note it, "null" means none
+  tools/tv.py 'settings put secure enabled_accessibility_services com.gathin.tvhome/.InputKeyService'
+  tools/tv.py 'settings put secure accessibility_enabled 1'
+  tools/tv.py 'dumpsys accessibility'   # InputKeyService under "Enabled services" and "Bound services"
+  ```
+
+  If the list already holds other services, append with a colon instead of replacing it, as
+  `build-and-install.sh` does.
+- **Undo**: `tools/tv.py 'settings delete secure enabled_accessibility_services'` if the list was
+  `null` before; otherwise put your saved value back.
+- **It does not survive a reinstall.** Android switches the service off every time the launcher is
+  reinstalled, so pass the flag, or repeat the commands above, after each update.
+- **Only the Input button.** The service filters one key. If a phone app misses d-pad, Back or Home
+  presses, it will not help: check the app's pairing first (`com.google.android.tv.remote.service` should
+  be installed and not disabled) and watch `logcat` while pressing, rather than disabling more packages.
+- **Turning ADB on to do this is temporary.** Switch both debugging options off again afterwards and
+  check that port 5555 is refused from your computer.
+
+On the BeyondTV2 the service bound on the first try, because `APP_AUTO_START` had already been allowed
+for the launcher (see below). Without that, TCL's boot manager can refuse to bind it.
+
 ## Accessibility helper enabled but the remote button does nothing
 
 The optional `HomeKeyService` and `InputKeyService` only filter remote keys once Android has bound to

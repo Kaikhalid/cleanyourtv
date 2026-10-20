@@ -99,7 +99,9 @@ Take a backup first, and apply changes in small batches with a smoke test after 
 3. **Disable the bloat:** `TV_HOST=<tv-ip> tools/disable.sh examples/tcl-beyondtv2-android11/debloat.txt`
 4. **Swap the launcher.** `TV_HOST=<tv-ip> STOCK_LAUNCHER=com.google.android.tvlauncher launcher/build-and-install.sh`
    starts the new launcher before touching the stock one, and puts the stock one back if Home does not resolve to it.
-   Pull the stock launcher's APKs and keep a one-line rescue script before you run it.
+   Pull the stock launcher's APKs and keep a one-line rescue script before you run it. **Add `INPUT_KEY_SERVICE=1`**
+   if you use the remote's Input button or a phone remote app: with the stock launcher gone nothing else handles that
+   key, and this TV shows no switch for it in Settings ([details](docs/TROUBLESHOOTING.md#the-input-button-or-a-phone-remote-stops-working-after-the-stock-launcher-is-gone)).
 5. **Theme and screensaver:** the commands above.
 6. **Optional, ad-blocking DNS:** `settings put global private_dns_specifier dns.adguard-dns.com` then
    `settings put global private_dns_mode hostname`. AdGuard sees the domain names your TV looks up, though not what you watch.
