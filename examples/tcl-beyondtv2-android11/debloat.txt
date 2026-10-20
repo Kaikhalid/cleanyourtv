@@ -1,0 +1,32 @@
+# TCL BeyondTV2, as the TV reports itself (getprop): ro.product.brand / manufacturer TCL,
+# ro.product.model = BeyondTV2, ro.product.name = BeyondTV2, ro.product.device = BeyondTV,
+# persist.tcl.client_type = TCL-ME-RT2851-S1, ro.tcl.product_type = ATV.
+# Android 11 (API 30), build PPR1.180610.011 / AR05 built 2022-05-26, security patch 2021-12-05;
+# first API level 28, so it shipped on Android 9 and was updated. Fingerprint:
+# TCL/BeyondTV2/BeyondTV:11/PPR1.180610.011/AR05:user/release-keys
+# Realtek RTD2851 board (ro.board.platform rtd285o), 2 GB RAM, 32-bit armeabi-v7a, en-GB locale.
+# The retail/marketing model number is not in the system properties; look for it on the sticker at
+# the back of the TV.
+# Tested 2026-10-20 on a real unit, then rebooted.
+# Derived from examples/tcl-beyondtv2-latin-america (Android 9, same board) and checked against
+# the packages actually installed here. Everything is DISABLED, not uninstalled.
+#
+# Apply:   TV_HOST=<tv-ip> tools/disable.sh examples/tcl-beyondtv2-android11/debloat.txt
+# Undo:    TV_HOST=<tv-ip> tools/restore.sh examples/tcl-beyondtv2-android11/debloat.txt
+#
+# KEPT on purpose (owner's choices): Google Assistant / voice, Chromecast and Miracast, firmware
+# updates, Play Store, Netflix, Apple TV, YouTube, Spotify. DO NOT DISABLE: com.tcl.tv,
+# com.tcl.tvinput, com.tcl.autopair, com.tcl.keycustomfunctionservice, com.tcl.partnercustomizer,
+# com.tcl.framework.custom, com.tcl.versionUpdateApp, com.tcl.settings, com.tcl.initsetup.
+#
+# HELD, not disabled (unclear role or untested on this model; each holds reboot / secure-settings
+# permissions): com.tcl.tv.tclhome_master, com.tcl.overseasappshow, com.tcl.messagebox,
+# com.tcl.dashboard (GiftService), com.tcl.guard, com.tcl.esticker (does not stay disabled).
+
+# Batch 1: tested on a real BeyondTV2 in the Latin America list
+com.tcl.bi                              # analytics / telemetry service
+com.tcl.tv.tclhome_passive              # pushes TCL content to the home screen at boot
+
+# Batch 2: content feed (in the India BeyondTV list; inspected here: a web content feed with
+# deep-link activities, INTERNET + boot receiver, no role in tuner / HDMI / input)
+com.tcl.waterfall.overseas              # TCL web content feed

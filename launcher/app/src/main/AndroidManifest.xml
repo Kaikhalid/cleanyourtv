@@ -108,6 +108,19 @@
             </intent-filter>
         </service>
 
+        <!-- Flip-clock screensaver: `settings put secure screensaver_components
+             com.gathin.tvhome/.FlipClockDream` over adb. -->
+        <service
+            android:name=".FlipClockDream"
+            android:label="@string/dream_name_flip"
+            android:exported="true"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </service>
+
         <!-- The remote's Input button (KEYCODE_TV) opens the input switcher; see InputKeyService. -->
         <service
             android:name=".InputKeyService"

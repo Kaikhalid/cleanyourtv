@@ -32,6 +32,12 @@ Strip the bloatware from any Android TV or Google TV over Wi-Fi, and replace the
 screen with a clean launcher that looks like an Apple TV. **No root, no cable, nothing uninstalled,
 and a one-line restore if you change your mind.**
 
+> **TCL edition.** This fork adds what was needed to run CleanYourTV on a **TCL BeyondTV2** (`ro.product.model` BeyondTV2,
+> Realtek RTD2851, build AR05, **Android 11**, 2 GB RAM):
+> a tested debloat list ([`examples/tcl-beyondtv2-android11/`](examples/tcl-beyondtv2-android11/debloat.txt)),
+> and a **Flip clock screensaver** (below). A TCL also needs `APP_AUTO_START` allowed for the screensaver to start
+> ([`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)). Upstream: [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv).
+
 <h3 align="center">80 TV models &nbsp;·&nbsp; 28 brands &nbsp;·&nbsp; 15 languages &nbsp;·&nbsp; 300 KB launcher</h3>
 
 <p align="center">
@@ -276,6 +282,11 @@ the install script finds `~/Android/Sdk` and the `java` on your PATH.
 - **Module cards** let any TV app declare its own tile (label, caption, glow). The launcher asks you once per app, Keep hidden by default, and remembers the answer for that app's signing key and card name. Hold OK on Settings and choose Module cards to change your mind. How to make one: [`docs/modules.md`](docs/modules.md); the contract: [`docs/specs/card.md`](docs/specs/card.md).
 - **Clock screensaver**: a drifting clock over the glow, so nothing burns in. Pick "Clock" in the TV's screensaver settings, or over ADB:
   `tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.ClockDream; settings put secure screensaver_enabled 1'`
+- **Flip clock screensaver** (TCL edition): a split-flap clock in the style of Fliqlo, two cards on black, hours and minutes, dead centre
+  and never moving, flipping once a minute (no animation between minutes, no network, 12 or 24 hour to match the TV). Pick "Flip clock" in the
+  screensaver settings, or over ADB:
+  `tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.FlipClockDream; settings put secure screensaver_enabled 1'`
+  On a TCL, also run `tools/tv.py 'appops set com.gathin.tvhome APP_AUTO_START allow'` once, or TCL's boot manager blocks the screensaver from starting.
 - **Remote keys**: an optional accessibility service keeps the remote's Input button working on Google TV (`INPUT_KEY_SERVICE=1` at install), another fixes sticks whose Home key sends ALL_APPS and opens Settings from the remote's gear button, even one Android does not map (`HOME_KEY_SERVICE=1`, scancodes or keycodes in `config.xml`). With `settings_key_panel` the gear opens a [small quick settings panel](docs/quick-settings-panel.jpg) instead, over Home or any app: TV settings, Display, Network, Apps and Launcher settings.
 - **Navigation** is deliberate: Up and Down move one row, the top buttons never fall through to tiles and Down from them returns to the dock tile you came from, the last focused app is remembered, and installing or removing an app refreshes the tiles while Home is open.
 - **Artwork**: app banners load at xhdpi or better, so low-density TV UIs do not downsample them before the focus zoom.
