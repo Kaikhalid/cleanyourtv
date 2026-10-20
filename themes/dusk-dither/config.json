@@ -1,0 +1,11 @@
+{
+  "dock_apps": [
+    "com.netflix.ninja",
+    "com.apple.atve.androidtv.appletv",
+    "com.google.android.youtube.tv",
+    "com.spotify.tv.android"
+  ],
+  "wallpaper": true,
+  "sky_intensity": 45,
+  "module_cards": false
+}

@@ -1,4 +1,126 @@
 <p align="center">
+  <img src="docs/tcl/hero.jpg" alt="CleanYourTV, TCL Edition: the new home screen with a flip clock screensaver in front, on a TCL BeyondTV2" width="100%">
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/TV-TCL%20BeyondTV2-ff8c70?style=flat&labelColor=15181e" alt="TCL BeyondTV2">
+  <img src="https://img.shields.io/badge/Android-11-cfffcf?style=flat&labelColor=15181e" alt="Android 11">
+  <img src="https://img.shields.io/badge/Realtek-RTD2851-9db2ff?style=flat&labelColor=15181e" alt="Realtek RTD2851">
+  <img src="https://img.shields.io/badge/uninstalled-0-cfffcf?style=flat&labelColor=15181e" alt="Nothing uninstalled">
+  <img src="https://img.shields.io/badge/reversible-yes-cfffcf?style=flat&labelColor=15181e" alt="Reversible">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/licence-MIT-cfffcf?style=flat&labelColor=15181e" alt="MIT"></a>
+</p>
+
+# CleanYourTV, TCL Edition
+
+A fork of [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv) tuned for one TV: the **TCL BeyondTV2**
+(`ro.product.model` BeyondTV2, build AR05, **Android 11**, Realtek RTD2851, 2 GB RAM). It adds a tested debloat
+list, a **flip clock screensaver**, and a wallpaper theme made from a personal photo. Everything here was run on a
+real unit and survived a cold reboot. Nothing is uninstalled, and one command puts the TV back how it was.
+
+## Before and after
+
+<p align="center"><img src="docs/tcl/before-after.jpg" alt="Left: the stock TCL home screen with search, tabs and recommendation rows. Right: the CleanYourTV home screen with four apps over a dithered photo and a clock." width="100%"></p>
+
+The stock home screen carries a Search and Apps header, a TCL Guard tile, and recommendation rows that pull from
+Netflix and Spotify. The replacement shows your four apps, a clock, and three buttons (Inputs, Wi-Fi, Settings).
+
+| | Before | After |
+|---|---|---|
+| Home | Android TV launcher with content rows | CleanYourTV launcher: Netflix, Apple TV, YouTube, Spotify |
+| Background | Black | Your photo, dithered, with a sky-intensity glow |
+| Screensaver | Google Backdrop, photos from the internet | Flip clock, offline |
+| TCL extras | `com.tcl.bi` analytics, `tclhome_passive` and `waterfall.overseas` content feeds | Disabled (not uninstalled) |
+| DNS | The router's | AdGuard (optional, one setting) |
+
+## The flip clock
+
+<p align="center"><img src="docs/tcl/flip-clock.gif" alt="The flip clock changing from 11:14 to 11:15, recorded on the TV" width="560"></p>
+
+A split-flap clock in the style of [Fliqlo](https://fliqlo.com/), written from scratch: two cards on black, hours
+and minutes, one flip a minute. The recording above is the real thing, captured on the TV.
+
+- **Dead centre, never moves.** The cards are centred on both axes, and digits are centred on their drawn shapes
+  rather than their font advance, so a narrow "1" sits as centred as an "8".
+- **Idle between minutes.** It redraws only during the 0.7 s flip. No network, no images, no background work.
+- **12 or 24 hour** to match the TV, with a small AM/PM tag.
+- **Code:** [`FlipClockDream.java`](launcher/app/src/main/java/com/gathin/tvhome/FlipClockDream.java) and
+  [`FlipClockView.java`](launcher/app/src/main/java/com/gathin/tvhome/FlipClockView.java), about 250 lines of plain
+  Java and canvas calls.
+
+Turn it on:
+
+```bash
+tools/tv.py 'settings put secure screensaver_components com.gathin.tvhome/.FlipClockDream; settings put secure screensaver_enabled 1'
+tools/tv.py 'appops set com.gathin.tvhome APP_AUTO_START allow'
+```
+
+The second line matters on a TCL: its boot manager otherwise refuses to start the screensaver (see
+[`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)).
+
+## The wallpaper
+
+<p align="center"><img src="docs/tcl/wallpaper-dither.jpg" alt="The dithered wallpaper next to a five times zoom of the dither pattern" width="100%"></p>
+
+The theme is [`themes/dusk-dither`](themes/dusk-dither): a photo graded dark across the top (so the clock and buttons
+stay readable), then reduced to 28 colours with an 8 x 8 Bayer ordered dither. The result is 1920 x 1080 and 287 KB,
+which suits a 2 GB TV. The launcher's sky-intensity glow sits on top. Push it with:
+
+```bash
+TV_HOST=<tv-ip> tools/theme.sh themes/dusk-dither
+```
+
+Make your own the same way, and **strip the metadata before you publish a photo**. Phone photos carry GPS
+coordinates, and every image in this fork has had its EXIF, XMP, ICC and JFIF segments removed.
+
+## This TV
+
+| | |
+|---|---|
+| Model | TCL BeyondTV2 (`ro.product.model` BeyondTV2, device `BeyondTV`, client type `TCL-ME-RT2851-S1`) |
+| System | Android 11 (API 30), build `PPR1.180610.011` / AR05, security patch 2021-12-05; shipped on Android 9 |
+| Hardware | Realtek RTD2851 (`rtd285o`), 2 GB RAM, 32-bit `armeabi-v7a` |
+| Disabled | `com.tcl.bi`, `com.tcl.tv.tclhome_passive`, `com.tcl.waterfall.overseas`, plus the stock launcher |
+| Kept on purpose | Play Store, Cast and Miracast, firmware updates, the voice assistant |
+| Never disable | `com.tcl.tv`, `com.tcl.tvinput`, `com.tcl.autopair`, `com.tcl.keycustomfunctionservice`, `com.tcl.partnercustomizer`, `com.tcl.framework.custom`, `com.tcl.versionUpdateApp`, `com.tcl.settings`, `com.tcl.initsetup` |
+| Held | `tclhome_master`, `overseasappshow`, `messagebox`, `dashboard`, `guard`, `esticker`: unclear role, untested |
+
+The full list, with the reasoning, is in
+[`examples/tcl-beyondtv2-android11/debloat.txt`](examples/tcl-beyondtv2-android11/debloat.txt).
+
+## Do it on your BeyondTV2
+
+Take a backup first, and apply changes in small batches with a smoke test after each.
+
+1. **Enable ADB.** Tap Build 7 times in Settings > About, then turn on USB debugging and network debugging, and
+   `adb connect <tv-ip>:5555`.
+2. **Save the current state:** `pm list packages -f`, `pm list packages -d`, and `settings list system|secure|global`,
+   to a folder on your computer.
+3. **Disable the bloat:** `TV_HOST=<tv-ip> tools/disable.sh examples/tcl-beyondtv2-android11/debloat.txt`
+4. **Swap the launcher.** `TV_HOST=<tv-ip> STOCK_LAUNCHER=com.google.android.tvlauncher launcher/build-and-install.sh`
+   starts the new launcher before touching the stock one, and puts the stock one back if Home does not resolve to it.
+   Pull the stock launcher's APKs and keep a one-line rescue script before you run it.
+5. **Theme and screensaver:** the commands above.
+6. **Optional, ad-blocking DNS:** `settings put global private_dns_specifier dns.adguard-dns.com` then
+   `settings put global private_dns_mode hostname`. AdGuard sees the domain names your TV looks up, though not what you watch.
+7. **Close ADB** when you are done: turn both debugging switches off and revoke authorisations.
+
+**Undo everything:** `TV_HOST=<tv-ip> tools/restore.sh examples/tcl-beyondtv2-android11/debloat.txt`
+
+Do not run `launcher/build-and-install.sh` casually: it installs the launcher, sets it as Home and disables the
+stock one in one go.
+
+## Credits
+
+[Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv) is the upstream project and all of the launcher.
+The flip clock borrows only the look of Fliqlo, with no code or assets from it, and this fork is not affiliated with
+Fliqlo. The Outfit typeface is bundled upstream under the SIL Open Font Licence.
+
+---
+
+## Upstream README
+
+<p align="center">
   <a href="https://cleanyour.tv"><img src="https://raw.githubusercontent.com/Gathin23/cleanyourtv/main/docs/banner.png" alt="CleanYourTV. Your TV, minus the ads." width="800"></a>
 </p>
 
@@ -32,11 +154,6 @@ Strip the bloatware from any Android TV or Google TV over Wi-Fi, and replace the
 screen with a clean launcher that looks like an Apple TV. **No root, no cable, nothing uninstalled,
 and a one-line restore if you change your mind.**
 
-> **TCL edition.** This fork adds what was needed to run CleanYourTV on a **TCL BeyondTV2** (`ro.product.model` BeyondTV2,
-> Realtek RTD2851, build AR05, **Android 11**, 2 GB RAM):
-> a tested debloat list ([`examples/tcl-beyondtv2-android11/`](examples/tcl-beyondtv2-android11/debloat.txt)),
-> and a **Flip clock screensaver** (below). A TCL also needs `APP_AUTO_START` allowed for the screensaver to start
-> ([`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md)). Upstream: [Gathin23/cleanyourtv](https://github.com/Gathin23/cleanyourtv).
 
 <h3 align="center">80 TV models &nbsp;·&nbsp; 28 brands &nbsp;·&nbsp; 15 languages &nbsp;·&nbsp; 300 KB launcher</h3>
 
@@ -193,6 +310,7 @@ Toshiba Fire TV · Vu · Stellamore and XGIMI projectors
 | TCL ak30a5 (China, Amlogic) | Android TV 9 |
 | TCL BeyondTV (India) | Android TV 9 |
 | TCL BeyondTV, EU/Nordic (Realtek RTD2851, V8-R851T02-LF1V606) | Android TV 9 |
+| TCL BeyondTV2 (`ro.product.model` BeyondTV2, device `BeyondTV`, build AR05 / PPR1.180610.011, client type TCL-ME-RT2851-S1; Realtek RTD2851 / rtd285o, 2 GB, armeabi-v7a) | Android TV 11 (shipped on 9) |
 | TCL BeyondTV2 (Latin America / Brazil, Realtek RTD2851) | Android TV 9 |
 | TCL C755 QD-Mini LED, 2024, Australia (G08, MediaTek tcl9618) | Google TV 14 |
 | TCL QM6K Pro, 2025 (G08, MediaTek tcl9618) | Google TV 14 |
